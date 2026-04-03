@@ -6,7 +6,7 @@ async function linearRequest(query, variables = {}) {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "Authorization": process.env.lin_api_fi3qjgEE1tYLbrYxvpy4bN44hThlKiChiBHs15sn
+      "Authorization": process.env.LINEAR_API_KEY
     },
     body: JSON.stringify({ query, variables })
   });
