@@ -1,60 +1,50 @@
-window.addEventListener("DOMContentLoaded", () => {
-  const issueTitle = document.getElementById("issueTitle");
-  const issueDescription = document.getElementById("issueDescription");
-  const createIssueBtn = document.getElementById("createIssueBtn");
-  const statusMessage = document.getElementById("statusMessage");
+const issueTitle = document.getElementById("issueTitle");
+const issueDescription = document.getElementById("issueDescription");
+const createIssueBtn = document.getElementById("createIssueBtn");
+const statusMessage = document.getElementById("statusMessage");
 
-  console.log("script loaded");
-  console.log({ issueTitle, issueDescription, createIssueBtn, statusMessage });
+async function createIssue() {
+  const title = issueTitle.value.trim();
+  const description = issueDescription.value.trim();
 
-  if (!issueTitle || !issueDescription || !createIssueBtn || !statusMessage) {
-    console.error("Lipsește unul dintre elementele din HTML.");
+  if (!title) {
+    statusMessage.textContent = "Introdu titlul.";
     return;
   }
 
-  async function createIssue() {
-    const title = issueTitle.value.trim();
-    const description = issueDescription.value.trim();
+  statusMessage.textContent = "Se trimite...";
 
-    if (!title) {
-      statusMessage.textContent = "Introdu titlul.";
+  try {
+    const response = await fetch("/api/create-issue", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        title,
+        description
+      })
+    });
+
+    const data = await response.json();
+
+    if (data.error) {
+      statusMessage.textContent = data.error;
       return;
     }
 
-    statusMessage.textContent = "Se trimite...";
-
-    try {
-      const response = await fetch("/api/create-issue", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          title,
-          description
-        })
-      });
-
-      const data = await response.json();
-      console.log("response data:", data);
-
-      if (data.error) {
-        statusMessage.textContent = data.error;
-        return;
-      }
-
-      if (data.success && data.issue) {
-        statusMessage.innerHTML = `Issue creat: <a href="${data.issue.url}" target="_blank">${data.issue.identifier} - ${data.issue.title}</a>`;
-        issueTitle.value = "";
-        issueDescription.value = "";
-      } else {
-        statusMessage.textContent = "Nu s-a creat issue.";
-      }
-    } catch (err) {
-      console.error("fetch error:", err);
-      statusMessage.textContent = "Eroare conexiune.";
+    if (data.success && data.issue) {
+      statusMessage.innerHTML = `✅ Issue creat: <a href="${data.issue.url}" target="_blank">${data.issue.identifier}</a>`;
+      issueTitle.value = "";
+      issueDescription.value = "";
+    } else {
+      statusMessage.textContent = "Nu s-a creat issue.";
     }
-  }
 
-  createIssueBtn.addEventListener("click", createIssue);
-});
+  } catch (err) {
+    console.error(err);
+    statusMessage.textContent = "Eroare conexiune.";
+  }
+}
+
+createIssueBtn.addEventListener("click", createIssue);
