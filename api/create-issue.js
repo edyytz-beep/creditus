@@ -8,11 +8,13 @@ async function linearRequest(query, variables = {}) {
       "Content-Type": "application/json",
       "Authorization": process.env.LINEAR_API_KEY
     },
-    body: JSON.stringify({ query, variables })
+    body: JSON.stringify({
+      query,
+      variables
+    })
   });
 
-  const data = await response.json();
-  return data;
+  return response.json();
 }
 
 async function getTeamIdByKey(teamKey) {
@@ -31,14 +33,14 @@ async function getTeamIdByKey(teamKey) {
   const result = await linearRequest(query);
 
   if (result.errors) {
-    throw new Error(result.errors[0].message || "Nu am putut citi echipele.");
+    throw new Error(result.errors[0].message || "Nu pot încărca echipele.");
   }
 
   const teams = result?.data?.teams?.nodes || [];
-  const team = teams.find((t) => t.key === teamKey);
+  const team = teams.find((item) => item.key === teamKey);
 
   if (!team) {
-    throw new Error(`Nu am găsit echipa cu key ${teamKey}.`);
+    throw new Error("Nu am găsit echipa CRE.");
   }
 
   return team.id;
@@ -51,7 +53,7 @@ module.exports = async (req, res) => {
 
   try {
     if (!process.env.LINEAR_API_KEY) {
-      return res.status(500).json({ error: "LINEAR_API_KEY nu este setată." });
+      return res.status(500).json({ error: "LINEAR_API_KEY nu este setată în Vercel." });
     }
 
     const { title, description } = req.body || {};
@@ -87,7 +89,9 @@ module.exports = async (req, res) => {
     const result = await linearRequest(mutation, variables);
 
     if (result.errors) {
-      return res.status(400).json({ error: result.errors[0].message || "Eroare Linear." });
+      return res.status(400).json({
+        error: result.errors[0].message || "Eroare la crearea issue-ului."
+      });
     }
 
     const payload = result?.data?.issueCreate;
@@ -97,6 +101,8 @@ module.exports = async (req, res) => {
       issue: payload?.issue || null
     });
   } catch (error) {
-    return res.status(500).json({ error: error.message || "Eroare internă." });
+    return res.status(500).json({
+      error: error.message || "Eroare internă."
+    });
   }
 };
