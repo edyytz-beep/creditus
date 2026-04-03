@@ -1,23 +1,46 @@
-const createIssueBtn = document.getElementById("createIssueBtn");
 const issueTitle = document.getElementById("issueTitle");
 const issueDescription = document.getElementById("issueDescription");
+const createIssueBtn = document.getElementById("createIssueBtn");
 const statusMessage = document.getElementById("statusMessage");
 
-function createIssue() {
-    const title = issueTitle.value.trim();
-    const description = issueDescription.value.trim();
+async function createIssue() {
+  const title = issueTitle.value.trim();
+  const description = issueDescription.value.trim();
 
-    if (!title) {
-        statusMessage.textContent = "Introdu titlul.";
-        return;
+  if (!title) {
+    statusMessage.textContent = "Introdu titlul issue-ului.";
+    return;
+  }
+
+  statusMessage.textContent = "Trimit în Linear...";
+
+  try {
+    const response = await fetch("/api/create-issue", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ title, description })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      statusMessage.textContent = data.error || "A apărut o eroare.";
+      return;
     }
 
-    statusMessage.textContent = `Demo trimis cu succes: ${title}`;
-    console.log("Titlu:", title);
-    console.log("Descriere:", description);
-
-    issueTitle.value = "";
-    issueDescription.value = "";
+    if (data.success && data.issue) {
+      statusMessage.innerHTML = `Issue creat: <a href="${data.issue.url}" target="_blank">${data.issue.identifier} - ${data.issue.title}</a>`;
+      issueTitle.value = "";
+      issueDescription.value = "";
+    } else {
+      statusMessage.textContent = "Issue-ul nu a fost creat.";
+    }
+  } catch (error) {
+    console.error(error);
+    statusMessage.textContent = "Eroare de conectare.";
+  }
 }
 
 createIssueBtn.addEventListener("click", createIssue);
