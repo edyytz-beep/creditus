@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREDITUS</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="logo">CREDITUS</div>
+            <ul>
+                <li><a href="#hero">Acasă</a></li>
+                <li><a href="#linear">Linear</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="hero" class="hero">
+        <h1>CREDITUS + Linear</h1>
+        <p>Creare issue direct din site-ul local.</p>
+    </section>
+
+    <section id="linear" class="card">
+        <h2>Creează issue în Linear</h2>
+
+        <label for="issueTitle">Titlu</label>
+        <input type="text" id="issueTitle" placeholder="Ex: Lead nou din formularul CREDITUS">
+
+        <label for="issueDescription">Descriere</label>
+        <textarea id="issueDescription" rows="6" placeholder="Descriere issue..."></textarea>
+
+        <button id="createIssueBtn">Trimite în Linear</button>
+
+        <p id="statusMessage"></p>
+    </section>
+
+    <script src="script.js"></script>
+</body>
+</html>
