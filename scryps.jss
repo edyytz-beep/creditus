@@ -1,46 +1,60 @@
-const issueTitle = document.getElementById("issueTitle");
-const issueDescription = document.getElementById("issueDescription");
-const createIssueBtn = document.getElementById("createIssueBtn");
-const statusMessage = document.getElementById("statusMessage");
+window.addEventListener("DOMContentLoaded", () => {
+  const issueTitle = document.getElementById("issueTitle");
+  const issueDescription = document.getElementById("issueDescription");
+  const createIssueBtn = document.getElementById("createIssueBtn");
+  const statusMessage = document.getElementById("statusMessage");
 
-async function createIssue() {
-  const title = issueTitle.value.trim();
-  const description = issueDescription.value.trim();
+  console.log("script loaded");
+  console.log({ issueTitle, issueDescription, createIssueBtn, statusMessage });
 
-  if (!title) {
-    statusMessage.textContent = "Introdu titlul issue-ului.";
+  if (!issueTitle || !issueDescription || !createIssueBtn || !statusMessage) {
+    console.error("Lipsește unul dintre elementele din HTML.");
     return;
   }
 
-  statusMessage.textContent = "Trimit în Linear...";
+  async function createIssue() {
+    const title = issueTitle.value.trim();
+    const description = issueDescription.value.trim();
 
-  try {
-    const response = await fetch("/api/create-issue", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ title, description })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      statusMessage.textContent = data.error || "A apărut o eroare.";
+    if (!title) {
+      statusMessage.textContent = "Introdu titlul.";
       return;
     }
 
-    if (data.success && data.issue) {
-      statusMessage.innerHTML = `Issue creat: <a href="${data.issue.url}" target="_blank">${data.issue.identifier} - ${data.issue.title}</a>`;
-      issueTitle.value = "";
-      issueDescription.value = "";
-    } else {
-      statusMessage.textContent = "Issue-ul nu a fost creat.";
-    }
-  } catch (error) {
-    console.error(error);
-    statusMessage.textContent = "Eroare de conectare.";
-  }
-}
+    statusMessage.textContent = "Se trimite...";
 
-createIssueBtn.addEventListener("click", createIssue);
+    try {
+      const response = await fetch("/api/create-issue", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          title,
+          description
+        })
+      });
+
+      const data = await response.json();
+      console.log("response data:", data);
+
+      if (data.error) {
+        statusMessage.textContent = data.error;
+        return;
+      }
+
+      if (data.success && data.issue) {
+        statusMessage.innerHTML = `Issue creat: <a href="${data.issue.url}" target="_blank">${data.issue.identifier} - ${data.issue.title}</a>`;
+        issueTitle.value = "";
+        issueDescription.value = "";
+      } else {
+        statusMessage.textContent = "Nu s-a creat issue.";
+      }
+    } catch (err) {
+      console.error("fetch error:", err);
+      statusMessage.textContent = "Eroare conexiune.";
+    }
+  }
+
+  createIssueBtn.addEventListener("click", createIssue);
+});
